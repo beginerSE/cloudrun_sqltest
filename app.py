@@ -1,26 +1,27 @@
-# app.py
 import os
-import psycopg2
 from flask import Flask, request, jsonify
+from google.cloud.sql.connector import Connector
+import pg8000  # driverとして使う
 
 app = Flask(__name__)
 
-# ---- 環境変数から DB 接続情報を取得 ----
-DB_HOST = os.environ.get("DB_HOST", "34.41.230.82")
-DB_PORT = os.environ.get("DB_PORT", "5432")
+# Cloud SQL の接続情報（環境変数から）
+INSTANCE_CONNECTION_NAME = os.environ.get("INSTANCE_CONNECTION_NAME")  # "project:region:instance" 形式
 DB_NAME = os.environ.get("DB_NAME", "sampledb")
 DB_USER = os.environ.get("DB_USER", "postgres")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
 
+# Connector はプロセス内で使い回す
+connector = Connector()
 
 def get_connection():
-    """毎回シンプルに接続を作る最小構成"""
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        dbname=DB_NAME,
+    app.logger.info("Connecting to Cloud SQL via Connector")
+    conn = connector.connect(
+        INSTANCE_CONNECTION_NAME,  # "bitest-416604:europe-west1:your-instance"
+        "pg8000",
         user=DB_USER,
         password=DB_PASSWORD,
+        db=DB_NAME,
     )
     return conn
 
