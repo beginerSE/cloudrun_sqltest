@@ -1,6 +1,8 @@
 import os
 from flask import Flask, request, jsonify
 from google.cloud.sql.connector import Connector
+import logging
+logging.basicConfig(level=logging.INFO)
 import pg8000  # driverとして使う
 
 app = Flask(__name__)
